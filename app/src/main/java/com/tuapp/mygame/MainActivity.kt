@@ -4,10 +4,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tuapp.mygame.ui.theme.MyGameTheme
 
@@ -29,18 +38,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyGameTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-
-                }
+                Game()
             }
         }
     }
 }
-// difColor(coord x: Int, coord y: Int, colour: Int)
 data class CellState(
     val row: Int,
     val col: Int,
-    var isEmpty: Boolean = true
+    var isEmpty: Boolean = true,
+    var isSelected: Boolean = false
     )
 
 @Composable
@@ -68,8 +75,19 @@ fun Game() {
             onRowsChange = { rows = it },
             onColsChange = { cols = it }
         )
-    }
 
+        Spacer(Modifier.height(16.dp))
+
+        GameGrid(
+            cellStates = cellStates,
+            cols = cols,
+            onCellClick = { index ->
+                cellStates =cellStates.toMutableList().also {
+                    it[index] = it[index].copy(isSelected = !it[index].isSelected)
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -96,3 +114,37 @@ fun GridSize(
     }
 }
 
+@Composable
+fun GameGrid(
+    cellStates: List<CellState>,
+    cols: Int,
+    onCellClick: (Int) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(cols),
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        itemsIndexed(cellStates) { index, cell ->
+            GridCell(
+                cell = cell,
+                onClick = { onCellClick(index) }
+            )
+        }
+    }
+}
+
+@Composable
+fun GridCell(cell: CellState, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.aspectRatio(1f),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (cell.isSelected)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {}
+}
