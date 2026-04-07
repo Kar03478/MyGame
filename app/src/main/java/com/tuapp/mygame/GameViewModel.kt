@@ -3,7 +3,7 @@ package com.tuapp.mygame
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+
 
 class GameViewModel : ViewModel() {
     val rows = MutableStateFlow(5)
@@ -38,8 +38,12 @@ class GameViewModel : ViewModel() {
     }
 
     private fun emptyGrid(r: Int, c: Int) =
-        List(r * c) {
-                i -> CellState(i / c, i % c)
+        List(r * c) { i ->
+            CellState(
+                row = i/c,
+                col = i%c,
+                piece = null
+            )
         }
 
     private fun newTray() = List(3) {
