@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,9 @@ fun GridCell(
 ) {
     // highlight when drag is over it
     var isHovered by remember { mutableStateOf(false) }
+    LaunchedEffect(cell.piece) {
+        if (cell.piece != null) isHovered = false
+    }
     val dropTarget = remember(cell.piece) {
         object : DragAndDropTarget {
             override fun onStarted(event: DragAndDropEvent) {

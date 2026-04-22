@@ -89,7 +89,7 @@ fun TraySlot(
                 }
             ) {
                 detectTapGestures(
-                    onLongPress = {
+                    onPress = {
                         startTransfer(
                             DragAndDropTransferData(
                                 clipData = ClipData.newPlainText(
