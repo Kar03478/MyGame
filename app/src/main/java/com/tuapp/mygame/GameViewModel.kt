@@ -26,12 +26,25 @@ class GameViewModel : ViewModel() {
     private val _tray = MutableStateFlow(newTray())
     val tray = _tray.asStateFlow()
 
-    fun startGame(playerAlias: String, newRows: Int, newCols: Int) {
+    private val timer = GameTimer(
+        durationSeconds = 120L,
+        scope = viewModelScope,
+        onTimeUp = { _isGameOver.value = true }
+    )
+
+    val timeLeft = timer.timeLeft
+    val isTimeUp = timer.isTimeUp
+
+    fun startGame(playerAlias: String, newRows: Int, newCols: Int, withTimer: Boolean = false) {
         alias.value = playerAlias
         rows.value  = newRows
         cols.value  = newCols
+        trackTime.value = withTimer
+        _score.value = 0
         _cells.value = emptyGrid(newRows, newCols)
         _tray.value  = newTray()
+        _isGameOver.value = false
+        if (withTimer) timer.start() else timer.reset()
     }
 
     fun placePiece(trayIndex: Int, row: Int, col: Int) {
@@ -80,10 +93,24 @@ class GameViewModel : ViewModel() {
         slices = (1..3).random()
     )
     fun resetGame() {
+        if (trackTime.value) timer.start() else timer.reset()
         _score.value = 0
         _isGameOver.value = false
         _cells.value = emptyGrid(rows.value, cols.value)
         _tray.value = newTray()
+    }
+
+    fun abandonGame() {
+        timer.reset()
+        _score.value = 0
+        _isGameOver.value = false
+        _cells.value = emptyGrid(rows.value, cols.value)
+        _tray.value = newTray()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        timer.cancel()
     }
 }
 

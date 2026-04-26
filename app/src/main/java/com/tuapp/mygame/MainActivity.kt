@@ -23,12 +23,15 @@ class MainActivity : ComponentActivity() {
                 if (gameStarted) {
                     Game(
                         vm = vm,
-                        onBack = { gameStarted = false }
+                        onBack = {
+                            vm.abandonGame()
+                            gameStarted = false
+                        }
                     )
                 } else {
                     SetupScreen(
-                        onStartGame = { alias, rows, cols ->
-                            vm.startGame(alias, rows, cols)
+                        onStartGame = { alias, rows, cols, trackTime ->
+                            vm.startGame(alias, rows, cols, trackTime)
                             gameStarted = true
                         }
                     )
@@ -44,5 +47,4 @@ data class CellState(
     val piece: CakePiece? = null,
     val isDisappearing: Boolean = false
 )
-
 

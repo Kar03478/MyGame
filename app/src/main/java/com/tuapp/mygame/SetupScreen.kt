@@ -11,7 +11,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SetupScreen(onStartGame: (alias: String, rows: Int, cols: Int) -> Unit) {
+fun SetupScreen(onStartGame: (alias: String, rows: Int, cols: Int, trackTime: Boolean) -> Unit) {
     var alias by rememberSaveable { mutableStateOf("") }
     var rows   by rememberSaveable { mutableIntStateOf(5) }
     var cols   by rememberSaveable { mutableIntStateOf(5) }
@@ -94,23 +94,18 @@ fun SetupScreen(onStartGame: (alias: String, rows: Int, cols: Int) -> Unit) {
                 Switch(
                     checked = trackTime,
                     onCheckedChange = { trackTime = it },
-                    enabled = false
+                    enabled = true
                 )
                 Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("Control de tiempo")
-                    Text(
-                        "Próximamente",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
+
+                Text("Control de tiempo")
+
             }
 
             Spacer(Modifier.height(32.dp))
 
             Button(
-                onClick = { onStartGame(alias, rows, cols) },
+                onClick = { onStartGame(alias, rows, cols,trackTime) },
                 enabled = alias.isNotBlank(),
 
                 modifier = Modifier.fillMaxWidth()

@@ -51,6 +51,15 @@ fun Game(
     val score      by vm.score.collectAsStateWithLifecycle()
     val alias      by vm.alias.collectAsStateWithLifecycle()
     val isGameOver by vm.isGameOver.collectAsStateWithLifecycle()
+    val trackTime by vm.trackTime.collectAsStateWithLifecycle()
+    val timeLeft  by vm.timeLeft.collectAsStateWithLifecycle()
+    val isTimeUp  by vm.isTimeUp.collectAsStateWithLifecycle()
+
+    fun formatTime(seconds: Long): String {
+        val m = seconds / 60
+        val s = seconds % 60
+        return "%02d:%02d".format(m, s)
+    }
 
     Scaffold(
         topBar = {
@@ -94,6 +103,20 @@ fun Game(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (trackTime) {
+                    Text(
+                        text = formatTime(timeLeft),
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            isTimeUp -> MaterialTheme.colorScheme.error
+                            timeLeft <= 10 -> MaterialTheme.colorScheme.error
+                            timeLeft <= 30 -> MaterialTheme.colorScheme.tertiary
+                            else -> MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(cols),
                     modifier = Modifier
