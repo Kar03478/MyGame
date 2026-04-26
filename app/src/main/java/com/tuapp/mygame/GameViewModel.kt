@@ -12,6 +12,11 @@ class GameViewModel : ViewModel() {
     val alias = MutableStateFlow("")
     val trackTime = MutableStateFlow(false)
 
+    private val _isGameOver = MutableStateFlow(false)
+    val isGameOver = _isGameOver.asStateFlow()
+    private val _score = MutableStateFlow(0)
+    val score = _score.asStateFlow()
+
     private val _cells = MutableStateFlow(emptyGrid(5, 5))
     val cells = _cells.asStateFlow()
 
@@ -31,12 +36,19 @@ class GameViewModel : ViewModel() {
         val cell  = _cells.value.find { it.row == row && it.col == col }
         if (cell?.piece != null) return
 
-        _cells.value = _cells.value.map {
+        val gridWithPiece = _cells.value.map {
             if (it.row == row && it.col == col) it.copy(piece = piece) else it
         }
+
+        val result = mergePieces(gridWithPiece, row, col)
+
+        _cells.value  = result.grid
+        _score.value += result.pointsScored
+
         _tray.value = _tray.value.toMutableList().also {
             it[trayIndex] = randomPiece()
         }
+        _isGameOver.value = isGameOver(result.grid)
     }
 
     private fun emptyGrid(r: Int, c: Int) =
@@ -48,5 +60,11 @@ class GameViewModel : ViewModel() {
         type   = CakeType.entries.random(),
         slices = (1..3).random()
     )
+    fun resetGame() {
+        _score.value = 0
+        _isGameOver.value = false
+        _cells.value = emptyGrid(rows.value, cols.value)
+        _tray.value = newTray()
+    }
 }
 

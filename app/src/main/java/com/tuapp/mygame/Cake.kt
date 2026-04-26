@@ -16,6 +16,7 @@ enum class CakeType(val color: Color, val borderColor: Color) {
     LEMON(Color(0xFFFAC775), Color(0xFFBA7517)),
     BLUEBERRY(Color(0xFFCECBF6), Color(0xFF534AB7))
 }
+val TOTAL_PLATE_SLICES = 4
 data class CakePiece(
     val type: CakeType,
     val slices: Int // 1, 2, 3, 4
@@ -35,7 +36,7 @@ fun CakePieceView(piece: CakePiece, modifier: Modifier = Modifier) {
             color = piece.type.borderColor,
             style = Stroke(width = 2.dp.toPx())
         )
-        repeat(4) { i ->
+        repeat(TOTAL_PLATE_SLICES) { i ->
             val angle = Math.toRadians((i * 90.0 - 90.0))
             drawLine(
                 color = piece.type.borderColor,

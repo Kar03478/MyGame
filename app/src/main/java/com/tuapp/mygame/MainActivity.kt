@@ -21,7 +21,10 @@ class MainActivity : ComponentActivity() {
                 var gameStarted by remember { mutableStateOf(false) }
 
                 if (gameStarted) {
-                    Game(vm = vm)
+                    Game(
+                        vm = vm,
+                        onBack = { gameStarted = false }
+                    )
                 } else {
                     SetupScreen(
                         onStartGame = { alias, rows, cols ->
