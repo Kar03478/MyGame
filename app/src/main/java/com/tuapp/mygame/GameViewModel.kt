@@ -1,8 +1,11 @@
 package com.tuapp.mygame
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 
 class GameViewModel : ViewModel() {
@@ -41,14 +44,30 @@ class GameViewModel : ViewModel() {
         }
 
         val result = mergePieces(gridWithPiece, row, col)
+        if (result.disappearingCells.isNotEmpty()) {
+            _cells.value = result.grid.map { cell ->
+                if (result.disappearingCells.contains(cell.row to cell.col))
+                    cell.copy(isDisappearing = true)
+                else cell
+            }
+            _score.value += result.pointsScored
 
-        _cells.value  = result.grid
-        _score.value += result.pointsScored
-
-        _tray.value = _tray.value.toMutableList().also {
-            it[trayIndex] = randomPiece()
+            viewModelScope.launch {
+                delay(350)
+                _cells.value = _cells.value.map { it.copy(isDisappearing = false) }
+                _tray.value = _tray.value.toMutableList().also {
+                    it[trayIndex] = randomPiece()
+                }
+                _isGameOver.value = isGameOver(_cells.value)
+            }
+        } else {
+            _cells.value  = result.grid
+            _score.value += result.pointsScored
+            _tray.value = _tray.value.toMutableList().also {
+                it[trayIndex] = randomPiece()
+            }
+            _isGameOver.value = isGameOver(result.grid)
         }
-        _isGameOver.value = isGameOver(result.grid)
     }
 
     private fun emptyGrid(r: Int, c: Int) =

@@ -17,83 +17,106 @@ fun SetupScreen(onStartGame: (alias: String, rows: Int, cols: Int) -> Unit) {
     var cols   by rememberSaveable { mutableIntStateOf(5) }
     var trackTime by rememberSaveable { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Text("Nueva partida", style = MaterialTheme.typography.headlineMedium)
-
-        Spacer(Modifier.height(32.dp))
-
-        // Alias
-        OutlinedTextField(
-            value = alias,
-            onValueChange = { alias = it },
-            label = { Text("Tu nombre") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Words
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(24.dp))
-
-        // Tamaño de la parrilla
-        Text("Filas: $rows", style = MaterialTheme.typography.bodyLarge)
-        Slider(
-            value = rows.toFloat(),
-            onValueChange = { rows = it.toInt() },
-            valueRange = 2f..10f,
-            steps = 7,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Text("Columnas: $cols", style = MaterialTheme.typography.bodyLarge)
-        Slider(
-            value = cols.toFloat(),
-            onValueChange = { cols = it.toInt() },
-            valueRange = 2f..10f,
-            steps = 7,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(24.dp))
-
-        // Control de tiempo (deshabilitado por ahora)
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Switch(
-                checked = trackTime,
-                onCheckedChange = { trackTime = it },
-                enabled = false   // lo activaremos más adelante
-            )
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text("Control de tiempo")
-                Text(
-                    "Próximamente",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
+            Text("Nueva partida", style = MaterialTheme.typography.headlineMedium)
+
+            Spacer(Modifier.height(32.dp))
+
+            // Alias
+            OutlinedTextField(
+                value = alias,
+                onValueChange = { alias = it },
+                label = { Text("Tu nombre") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                    focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                    cursorColor = MaterialTheme.colorScheme.onBackground,
+                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.background
                 )
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            Text("Filas: $rows", style = MaterialTheme.typography.bodyLarge)
+            Slider(
+                value = rows.toFloat(),
+                onValueChange = { rows = it.toInt() },
+                valueRange = 2f..5f,
+                steps = 2,
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.tertiary,
+                    activeTrackColor = MaterialTheme.colorScheme.tertiary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text("Columnas: $cols", style = MaterialTheme.typography.bodyLarge)
+            Slider(
+                value = cols.toFloat(),
+                onValueChange = { cols = it.toInt() },
+                valueRange = 2f..5f,
+                steps = 2,
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.tertiary,
+                    activeTrackColor = MaterialTheme.colorScheme.tertiary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Switch(
+                    checked = trackTime,
+                    onCheckedChange = { trackTime = it },
+                    enabled = false
+                )
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text("Control de tiempo")
+                    Text(
+                        "Próximamente",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
             }
-        }
 
-        Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(32.dp))
 
-        Button(
-            onClick = { onStartGame(alias, rows, cols) },
-            enabled = alias.isNotBlank(),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Empezar")
+            Button(
+                onClick = { onStartGame(alias, rows, cols) },
+                enabled = alias.isNotBlank(),
+
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Empezar")
+            }
         }
     }
 }

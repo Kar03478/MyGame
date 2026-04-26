@@ -2,12 +2,13 @@ package com.tuapp.mygame
 
 data class MergeResult(
     val grid: List<CellState>,
-    val pointsScored: Int
+    val pointsScored: Int,
+    val disappearingCells: Set<Pair<Int, Int>>
 )
 
 fun mergePieces(grid: List<CellState>, row: Int, col: Int): MergeResult {
     val currentPiece = grid.find { it.row == row && it.col == col }?.piece
-        ?: return MergeResult(grid, 0)
+        ?: return MergeResult(grid, 0, emptySet())
 
     val neighbors = listOf(
         row - 1 to col,
@@ -19,7 +20,7 @@ fun mergePieces(grid: List<CellState>, row: Int, col: Int): MergeResult {
             ?.takeIf { it.piece?.type == currentPiece.type }
     }
 
-    if (neighbors.isEmpty()) return MergeResult(grid, 0)
+    if (neighbors.isEmpty()) return MergeResult(grid, 0, emptySet())
 
     val totalSlices = currentPiece.slices + neighbors.sumOf { it.piece!!.slices }
     val completed = totalSlices / TOTAL_PLATE_SLICES
@@ -36,11 +37,12 @@ fun mergePieces(grid: List<CellState>, row: Int, col: Int): MergeResult {
             cell.copy(piece = if (remaining > 0) currentPiece.copy(slices = remaining) else null)
         else cell
     }
+    val disappearing = neighbors.map { it.row to it.col }.toSet()
     return if (remaining > 0) {
         val next = mergePieces(newGrid, row, col)
-        MergeResult(next.grid, points + next.pointsScored)
+        MergeResult(next.grid, points + next.pointsScored, disappearingCells = disappearing + next.disappearingCells)
     } else {
-        MergeResult(newGrid, points)
+        MergeResult(newGrid, points, disappearing)
     }
 }
 fun isGameOver(grid: List<CellState>): Boolean {

@@ -41,7 +41,8 @@ class MainActivity : ComponentActivity() {
 data class CellState(
     val row: Int,
     val col: Int,
-    val piece: CakePiece? = null
+    val piece: CakePiece? = null,
+    val isDisappearing: Boolean = false
 )
 
 
