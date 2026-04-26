@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,6 +50,7 @@ fun Game(
     val score      by vm.score.collectAsStateWithLifecycle()
     val alias      by vm.alias.collectAsStateWithLifecycle()
     val isGameOver by vm.isGameOver.collectAsStateWithLifecycle()
+    val hasWon     by vm.hasWon.collectAsStateWithLifecycle()
     val trackTime by vm.trackTime.collectAsStateWithLifecycle()
     val timeLeft  by vm.timeLeft.collectAsStateWithLifecycle()
     val isTimeUp  by vm.isTimeUp.collectAsStateWithLifecycle()
@@ -78,13 +78,6 @@ fun Game(
                             contentDescription = "back"
                         )
                     }
-                },
-                actions = {
-                    Text(
-                        text = "Puntos: $score",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
                 }
             )
         }
@@ -116,6 +109,18 @@ fun Game(
                         }
                     )
                 }
+                Text(
+                    text = "Puntos: $score / ${GameViewModel.TARGET_SCORE}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Objetivo: ${GameViewModel.TARGET_SCORE} puntos",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Spacer(Modifier.height(8.dp))
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(cols),
@@ -140,7 +145,7 @@ fun Game(
             }
 
             // Game Over overlay
-            if (isGameOver) {
+            if (isGameOver || hasWon) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -161,16 +166,20 @@ fun Game(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Text(
-                                text = "😵",
+                                text = if (hasWon) "\uD83C\uDF89" else "\uD83D\uDE35",
                                 style = MaterialTheme.typography.displayLarge
                             )
                             Text(
-                                text = "¡Has perdido!",
+                                text = if (hasWon) "¡Has ganado!" else "¡Has perdido!",
                                 style = MaterialTheme.typography.headlineLarge,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                text = alias.ifBlank { "Jugador" } + ", el tablero está lleno.",
+                                text = when {
+                                    hasWon -> alias.ifBlank { "Jugador" } + ", has llegado a los ${GameViewModel.TARGET_SCORE} puntos."
+                                    isTimeUp -> alias.ifBlank { "Jugador" } + ", se ha acabado el tiempo."
+                                    else -> alias.ifBlank { "Jugador" } + ", el tablero está lleno."
+                                },
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 textAlign = TextAlign.Center

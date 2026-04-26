@@ -14,7 +14,7 @@ import kotlin.math.sin
 enum class CakeType(val color: Color, val borderColor: Color) {
     STRAWBERRY(Color(0xFFF09595), Color(0xFFE24B4A)),
     LEMON(Color(0xFFFAC775), Color(0xFFBA7517)),
-    BLUEBERRY(Color(0xFFCECBF6), Color(0xFF534AB7)),
+    BLUEBERRY(Color(0xFFA3A0E1), Color(0xFF534AB7)),
     MINT(Color(0xFF95F0C4), Color(0xFF1D9E75)),
     CHOCOLATE(Color(0xFF8B4513), Color(0xFF4E2A0A)),
     GRAPE(Color(0xFFE8A0F0), Color(0xFF8B2FA8))

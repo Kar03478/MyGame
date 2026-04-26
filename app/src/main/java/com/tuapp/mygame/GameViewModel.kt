@@ -9,6 +9,9 @@ import kotlinx.coroutines.launch
 
 
 class GameViewModel : ViewModel() {
+    companion object {
+        const val TARGET_SCORE = 500
+    }
 
     val rows = MutableStateFlow(5)
     val cols = MutableStateFlow(5)
@@ -17,6 +20,8 @@ class GameViewModel : ViewModel() {
 
     private val _isGameOver = MutableStateFlow(false)
     val isGameOver = _isGameOver.asStateFlow()
+    private val _hasWon = MutableStateFlow(false)
+    val hasWon = _hasWon.asStateFlow()
     private val _score = MutableStateFlow(0)
     val score = _score.asStateFlow()
 
@@ -41,6 +46,7 @@ class GameViewModel : ViewModel() {
         cols.value  = newCols
         trackTime.value = withTimer
         _score.value = 0
+        _hasWon.value = false
         _cells.value = emptyGrid(newRows, newCols)
         _tray.value  = newTray()
         _isGameOver.value = false
@@ -48,6 +54,8 @@ class GameViewModel : ViewModel() {
     }
 
     fun placePiece(trayIndex: Int, row: Int, col: Int) {
+        if (_isGameOver.value || _hasWon.value) return
+
         val piece = _tray.value.getOrNull(trayIndex) ?: return
         val cell  = _cells.value.find { it.row == row && it.col == col }
         if (cell?.piece != null) return
@@ -63,7 +71,7 @@ class GameViewModel : ViewModel() {
                     cell.copy(isDisappearing = true)
                 else cell
             }
-            _score.value += result.pointsScored
+            applyPoints(result.pointsScored)
 
             viewModelScope.launch {
                 delay(350)
@@ -71,15 +79,28 @@ class GameViewModel : ViewModel() {
                 _tray.value = _tray.value.toMutableList().also {
                     it[trayIndex] = randomPiece()
                 }
-                _isGameOver.value = isGameOver(_cells.value)
+                if (!_hasWon.value) {
+                    _isGameOver.value = isGameOver(_cells.value)
+                }
             }
         } else {
             _cells.value  = result.grid
-            _score.value += result.pointsScored
+            applyPoints(result.pointsScored)
             _tray.value = _tray.value.toMutableList().also {
                 it[trayIndex] = randomPiece()
             }
-            _isGameOver.value = isGameOver(result.grid)
+            if (!_hasWon.value) {
+                _isGameOver.value = isGameOver(result.grid)
+            }
+        }
+    }
+
+    private fun applyPoints(points: Int) {
+        _score.value += points
+        if (_score.value >= TARGET_SCORE) {
+            _hasWon.value = true
+            _isGameOver.value = false
+            timer.cancel()
         }
     }
 
@@ -95,6 +116,7 @@ class GameViewModel : ViewModel() {
     fun resetGame() {
         if (trackTime.value) timer.start() else timer.reset()
         _score.value = 0
+        _hasWon.value = false
         _isGameOver.value = false
         _cells.value = emptyGrid(rows.value, cols.value)
         _tray.value = newTray()
@@ -103,6 +125,7 @@ class GameViewModel : ViewModel() {
     fun abandonGame() {
         timer.reset()
         _score.value = 0
+        _hasWon.value = false
         _isGameOver.value = false
         _cells.value = emptyGrid(rows.value, cols.value)
         _tray.value = newTray()
