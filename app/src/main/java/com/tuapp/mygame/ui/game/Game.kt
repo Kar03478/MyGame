@@ -1,4 +1,4 @@
-package com.tuapp.mygame
+package com.tuapp.mygame.ui.game
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,27 +18,22 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tuapp.mygame.state.GameViewModel
+import com.tuapp.mygame.ui.components.AppTopBar
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Game(
     vm: GameViewModel = viewModel(),
@@ -55,6 +50,7 @@ fun Game(
     val timeLeft  by vm.timeLeft.collectAsStateWithLifecycle()
     val isTimeUp  by vm.isTimeUp.collectAsStateWithLifecycle()
 
+
     fun formatTime(seconds: Long): String {
         val m = seconds / 60
         val s = seconds % 60
@@ -62,23 +58,11 @@ fun Game(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                ),
-                title = { Text(alias.ifBlank { stringResource(R.string.app_name) }) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "back"
-                        )
-                    }
-                }
+            AppTopBar(
+                title = alias.ifBlank { "Partida" },
+                onBack = onBack
             )
         }
     ) { innerPadding ->
@@ -141,7 +125,9 @@ fun Game(
                 }
 
                 Spacer(Modifier.height(16.dp))
-                GameTray(pieces = tray)
+                GameTray(
+                    pieces = tray,
+                )
             }
 
             // Game Over overlay

@@ -1,5 +1,5 @@
 // GameTimer.kt
-package com.tuapp.mygame
+package com.tuapp.mygame.logic
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

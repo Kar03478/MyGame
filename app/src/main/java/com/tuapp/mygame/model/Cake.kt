@@ -1,4 +1,4 @@
-package com.tuapp.mygame
+package com.tuapp.mygame.model
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio

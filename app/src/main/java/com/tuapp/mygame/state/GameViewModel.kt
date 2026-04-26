@@ -1,5 +1,11 @@
-package com.tuapp.mygame
+package com.tuapp.mygame.state
 
+import com.tuapp.mygame.logic.GameTimer
+import com.tuapp.mygame.logic.isGameOver
+import com.tuapp.mygame.logic.mergePieces
+import com.tuapp.mygame.model.CakePiece
+import com.tuapp.mygame.model.CakeType
+import com.tuapp.mygame.model.CellState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -30,6 +36,17 @@ class GameViewModel : ViewModel() {
 
     private val _tray = MutableStateFlow(newTray())
     val tray = _tray.asStateFlow()
+
+    private val _draggingTrayIndex = MutableStateFlow<Int?>(null)
+    val draggingTrayIndex = _draggingTrayIndex.asStateFlow()
+
+    fun onDragStarted(trayIndex: Int) {
+        _draggingTrayIndex.value = trayIndex
+    }
+
+    fun onDragCancelled() {
+        _draggingTrayIndex.value = null
+    }
 
     private val timer = GameTimer(
         durationSeconds = 120L,
@@ -136,4 +153,3 @@ class GameViewModel : ViewModel() {
         timer.cancel()
     }
 }
-

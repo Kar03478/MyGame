@@ -1,4 +1,7 @@
-package com.tuapp.mygame
+package com.tuapp.mygame.logic
+
+import com.tuapp.mygame.model.CellState
+import com.tuapp.mygame.model.TOTAL_PLATE_SLICES
 
 data class MergeResult(
     val grid: List<CellState>,

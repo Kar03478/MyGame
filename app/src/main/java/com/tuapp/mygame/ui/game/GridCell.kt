@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 
-package com.tuapp.mygame
+package com.tuapp.mygame.ui.game
 
 import android.content.ClipDescription
 import androidx.compose.animation.core.EaseIn
@@ -31,6 +31,8 @@ import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.tuapp.mygame.model.CellState
+import com.tuapp.mygame.model.CakePieceView
 
 @Composable
 fun GridCell(

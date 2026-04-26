@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 
-package com.tuapp.mygame
+package com.tuapp.mygame.ui.game
 
 import android.content.ClipData
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -22,6 +22,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.tuapp.mygame.model.CakePiece
+import com.tuapp.mygame.model.CakePieceView
 import kotlin.math.cos
 import kotlin.math.sin
 

@@ -1,4 +1,4 @@
-package com.tuapp.mygame
+package com.tuapp.mygame.ui.setup
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,26 +9,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.tuapp.mygame.ui.components.AppTopBar
 
 @Composable
-fun SetupScreen(onStartGame: (alias: String, rows: Int, cols: Int, trackTime: Boolean) -> Unit) {
+fun SetupScreen(
+    onBack: () -> Unit = {},
+    onStartGame: (alias: String, rows: Int, cols: Int, trackTime: Boolean) -> Unit
+) {
     var alias by rememberSaveable { mutableStateOf("") }
     var rows   by rememberSaveable { mutableIntStateOf(5) }
     var cols   by rememberSaveable { mutableIntStateOf(5) }
     var trackTime by rememberSaveable { mutableStateOf(false) }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            AppTopBar(
+                title = "Nueva partida",
+                onBack = onBack
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .padding(24.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Nueva partida", style = MaterialTheme.typography.headlineMedium)
 
             Spacer(Modifier.height(32.dp))
 
@@ -105,9 +114,8 @@ fun SetupScreen(onStartGame: (alias: String, rows: Int, cols: Int, trackTime: Bo
             Spacer(Modifier.height(32.dp))
 
             Button(
-                onClick = { onStartGame(alias, rows, cols,trackTime) },
+                onClick = { onStartGame(alias, rows, cols, trackTime) },
                 enabled = alias.isNotBlank(),
-
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Empezar")
