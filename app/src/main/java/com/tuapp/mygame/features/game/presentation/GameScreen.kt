@@ -1,11 +1,13 @@
 package com.tuapp.mygame.features.game.presentation
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,7 +45,6 @@ fun GameScreen(
     val rows      by vm.rows.collectAsStateWithLifecycle()
     val cols      by vm.cols.collectAsStateWithLifecycle()
     val score     by vm.score.collectAsStateWithLifecycle()
-    val alias     by vm.alias.collectAsStateWithLifecycle()
     val isGameOver by vm.isGameOver.collectAsStateWithLifecycle()
     val hasWon    by vm.hasWon.collectAsStateWithLifecycle()
     val trackTime by vm.trackTime.collectAsStateWithLifecycle()
@@ -81,40 +83,37 @@ private fun GameScreenContent(
     isTimeUp: Boolean,
     onDrop: (Int, Int, Int) -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val boardAspect = cols.toFloat() / rows.toFloat()
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            val isLandscape = maxWidth > maxHeight
-
             if (isLandscape) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    BoxWithConstraints(
+                    Box(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
                         contentAlignment = Alignment.Center
                     ) {
-                        val boardAspect = cols.toFloat() / rows.toFloat()
-                        val widthFromHeight = maxHeight * boardAspect
-                        val boardWidth = minOf(maxWidth, widthFromHeight)
-                        val boardHeight = boardWidth / boardAspect
-
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(cols),
                             modifier = Modifier
-                                .width(boardWidth)
-                                .height(boardHeight),
+                                .fillMaxHeight()
+                                .aspectRatio(boardAspect),
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
