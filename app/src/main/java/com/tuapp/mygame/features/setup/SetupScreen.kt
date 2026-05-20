@@ -21,31 +21,25 @@ fun SetupScreen(
 ) {
     val context = LocalContext.current
     var alias by rememberSaveable { mutableStateOf(context.getString(R.string.alias)) }
-    var rows   by rememberSaveable { mutableIntStateOf(5) }
-    var cols   by rememberSaveable { mutableIntStateOf(5) }
     var trackTime by rememberSaveable { mutableStateOf(false) }
-    var gridSize by rememberSaveable { mutableIntStateOf(rows) }
+    var gridSize by rememberSaveable { mutableIntStateOf(5) }
 
     SetupScreenContent(
         alias = alias,
-        rows = rows,
         trackTime = trackTime,
         gridSize = gridSize,
         onAliasChange = { alias = it },
         onGridSizeSelected = { size ->
             gridSize = size
-            rows = size
-            cols = size
         },
         onTrackTimeChange = { trackTime = it },
-        onStartGame = { onStartGame(alias, rows, cols, trackTime) }
+        onStartGame = { onStartGame(alias, gridSize, gridSize, trackTime) }
     )
 }
 
 @Composable
 private fun SetupScreenContent(
     alias: String,
-    rows: Int,
     trackTime: Boolean,
     gridSize: Int,
     onAliasChange: (String) -> Unit,
