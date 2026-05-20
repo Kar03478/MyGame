@@ -21,10 +21,17 @@ class GameViewModel : ViewModel() {
         const val TARGET_SCORE = 200
     }
 
-    val rows = MutableStateFlow(5)
-    val cols = MutableStateFlow(5)
-    val alias = MutableStateFlow("")
-    val trackTime = MutableStateFlow(false)
+    private val _rows = MutableStateFlow(5)
+    val rows = _rows.asStateFlow()
+
+    private val _cols = MutableStateFlow(5)
+    val cols = _cols.asStateFlow()
+
+    private val _alias = MutableStateFlow("")
+    val alias = _alias.asStateFlow()
+
+    private val _trackTime = MutableStateFlow(false)
+    val trackTime = _trackTime.asStateFlow()
 
     private val _isGameOver = MutableStateFlow(false)
     val isGameOver = _isGameOver.asStateFlow()
@@ -52,10 +59,10 @@ class GameViewModel : ViewModel() {
     val isTimeUp = timer.isTimeUp
 
     fun startGame(playerAlias: String, newRows: Int, newCols: Int, withTimer: Boolean = false) {
-        alias.value = playerAlias
-        rows.value  = newRows
-        cols.value  = newCols
-        trackTime.value = withTimer
+        _alias.value = playerAlias
+        _rows.value = newRows
+        _cols.value = newCols
+        _trackTime.value = withTimer
         _score.value = 0
         _hasWon.value = false
         _cells.value = emptyGrid(newRows, newCols)
@@ -127,11 +134,11 @@ class GameViewModel : ViewModel() {
         slices = (1..3).random()
     )
     fun resetGame() {
-        if (trackTime.value) timer.start() else timer.reset()
+        if (_trackTime.value) timer.start() else timer.reset()
         _score.value = 0
         _hasWon.value = false
         _isGameOver.value = false
-        _cells.value = emptyGrid(rows.value, cols.value)
+        _cells.value = emptyGrid(_rows.value, _cols.value)
         _tray.value = newTray()
     }
 
@@ -140,7 +147,7 @@ class GameViewModel : ViewModel() {
         _score.value = 0
         _hasWon.value = false
         _isGameOver.value = false
-        _cells.value = emptyGrid(rows.value, cols.value)
+        _cells.value = emptyGrid(_rows.value, _cols.value)
         _tray.value = newTray()
     }
 
@@ -151,9 +158,9 @@ class GameViewModel : ViewModel() {
     fun buildGameLog(): GameLog {
         val elapsed = (System.currentTimeMillis() - gameStartTime) / 1000
         return GameLog(
-            alias = alias.value,
+            alias = _alias.value,
             score = _score.value,
-            gridSize = rows.value,
+            gridSize = _rows.value,
             durationSeconds = elapsed,
             endReason = if (_hasWon.value) {
                 EndReason.WIN
