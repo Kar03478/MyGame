@@ -53,7 +53,7 @@ fun AppNavigation(vm: GameViewModel, onQuit: () -> Unit) {
                     onPlayAgain = {
                         vm.resetGame()
                         navController.navigate(Setup) {
-                            popUpTo(GameOver) { inclusive = true }
+                            popUpTo(Game) { inclusive = true }
                         }
                     },
                     onQuit = onQuit
