@@ -20,6 +20,7 @@ import com.tuapp.mygame.core.ui.components.AppTopBar
 fun HomeScreen(
     onPlay: () -> Unit,
     onHelp: () -> Unit,
+    onHistory: () -> Unit,
     onQuit: () -> Unit
 ) {
     Scaffold(
@@ -62,6 +63,7 @@ fun HomeScreen(
                     HomeButtons(
                         onPlay = onPlay,
                         onHelp = onHelp,
+                        onHistory = onHistory,
                         onQuit = onQuit,
                         modifier = Modifier.weight(1f)
                     )
@@ -88,6 +90,7 @@ fun HomeScreen(
                     HomeButtons(
                         onPlay = onPlay,
                         onHelp = onHelp,
+                        onHistory = onHistory,
                         onQuit = onQuit
                     )
                     Spacer(Modifier.height(16.dp))
@@ -101,6 +104,7 @@ fun HomeScreen(
 private fun HomeButtons(
     onPlay: () -> Unit,
     onHelp: () -> Unit,
+    onHistory: () -> Unit,
     onQuit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -121,6 +125,13 @@ private fun HomeButtons(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(stringResource(R.string.home_help), style = MaterialTheme.typography.titleMedium)
+        }
+
+        OutlinedButton(
+            onClick = onHistory,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.history_screen), style = MaterialTheme.typography.titleMedium)
         }
 
         TextButton(
