@@ -1,5 +1,6 @@
 package com.tuapp.mygame.features.game.presentation
 
+import android.content.res.Configuration
 import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +30,7 @@ fun GameOverScreen(
     onQuit: () -> Unit
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
     var recipientEmail by rememberSaveable { mutableStateOf("") }
 
     fun formatDuration(seconds: Long): String {
@@ -61,113 +64,212 @@ fun GameOverScreen(
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.game_over_email_chooser)))
     }
 
+    val durationText = formatDuration(log.durationSeconds)
+    val resultEmoji = when (log.endReason) {
+        EndReason.WIN        -> stringResource(R.string.game_over_win_emoji)
+        EndReason.TIME_UP    -> stringResource(R.string.game_over_time_up_emoji)
+        EndReason.BOARD_FULL -> stringResource(R.string.game_over_board_full_emoji)
+    }
+    val resultHeading = when (log.endReason) {
+        EndReason.WIN        -> stringResource(R.string.game_over_win_heading)
+        EndReason.TIME_UP    -> stringResource(R.string.game_over_time_up_heading)
+        EndReason.BOARD_FULL -> stringResource(R.string.game_over_board_full_heading)
+    }
+    val resultMessage = when (log.endReason) {
+        EndReason.WIN        -> stringResource(R.string.game_over_win_message, log.alias)
+        EndReason.TIME_UP    -> stringResource(R.string.game_over_time_up_message, log.alias)
+        EndReason.BOARD_FULL -> stringResource(R.string.game_over_board_full_message, log.alias)
+    }
+    val resultValue = when (log.endReason) {
+        EndReason.WIN        -> stringResource(R.string.game_over_result_win)
+        EndReason.TIME_UP    -> stringResource(R.string.game_over_result_time_up)
+        EndReason.BOARD_FULL -> stringResource(R.string.game_over_result_board_full)
+    }
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .navigationBarsPadding()
                 .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = stringResource(R.string.screen_game_over),
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            Text(
-                text = when (log.endReason) {
-                    EndReason.WIN        -> stringResource(R.string.game_over_win_emoji)
-                    EndReason.TIME_UP    -> stringResource(R.string.game_over_time_up_emoji)
-                    EndReason.BOARD_FULL -> stringResource(R.string.game_over_board_full_emoji)
-                },
-                style = MaterialTheme.typography.displayLarge
-            )
-
-            Text(
-                text = when (log.endReason) {
-                    EndReason.WIN        -> stringResource(R.string.game_over_win_heading)
-                    EndReason.TIME_UP    -> stringResource(R.string.game_over_time_up_heading)
-                    EndReason.BOARD_FULL -> stringResource(R.string.game_over_board_full_heading)
-                },
-                style = MaterialTheme.typography.headlineLarge,
-                textAlign = TextAlign.Center
-            )
-
-            Text(
-                text = when (log.endReason) {
-                    EndReason.WIN        -> stringResource(R.string.game_over_win_message, log.alias)
-                    EndReason.TIME_UP    -> stringResource(R.string.game_over_time_up_message, log.alias)
-                    EndReason.BOARD_FULL -> stringResource(R.string.game_over_board_full_message, log.alias)
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-
-            HorizontalDivider()
-
-            GameOverRow(
-                label = stringResource(R.string.game_over_score_label),
-                value = stringResource(R.string.game_over_score_value, log.score)
-            )
-            GameOverRow(
-                label = stringResource(R.string.game_over_board_label),
-                value = stringResource(R.string.game_over_board_value, log.gridSize)
-            )
-            GameOverRow(
-                label = stringResource(R.string.game_over_duration_label),
-                value = formatDuration(log.durationSeconds)
-            )
-            GameOverRow(
-                label = stringResource(R.string.game_over_result_label),
-                value = when (log.endReason) {
-                    EndReason.WIN        -> stringResource(R.string.game_over_result_win)
-                    EndReason.TIME_UP    -> stringResource(R.string.game_over_result_time_up)
-                    EndReason.BOARD_FULL -> stringResource(R.string.game_over_result_board_full)
+            if (isLandscape) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    GameOverSummary(
+                        log = log,
+                        durationText = durationText,
+                        resultEmoji = resultEmoji,
+                        resultHeading = resultHeading,
+                        resultMessage = resultMessage,
+                        resultValue = resultValue,
+                        compact = true,
+                        modifier = Modifier
+                            .weight(1.15f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
+                    )
+                    GameOverActions(
+                        recipientEmail = recipientEmail,
+                        onRecipientEmailChange = { recipientEmail = it },
+                        onSendEmail = { sendEmail() },
+                        onPlayAgain = onPlayAgain,
+                        onQuit = onQuit,
+                        modifier = Modifier
+                            .weight(0.85f)
+                            .fillMaxHeight(),
+                        centerVertically = true
+                    )
                 }
-            )
-
-            HorizontalDivider()
-
-            OutlinedTextField(
-                value = recipientEmail,
-                onValueChange = { recipientEmail = it },
-                label = { Text(stringResource(R.string.game_over_email_recipient)) },
-                placeholder = { Text("correo@ejemplo.com") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Done
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                onClick = { sendEmail() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.game_over_send_email))
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    GameOverSummary(
+                        log = log,
+                        durationText = durationText,
+                        resultEmoji = resultEmoji,
+                        resultHeading = resultHeading,
+                        resultMessage = resultMessage,
+                        resultValue = resultValue
+                    )
+                    HorizontalDivider()
+                    GameOverActions(
+                        recipientEmail = recipientEmail,
+                        onRecipientEmailChange = { recipientEmail = it },
+                        onSendEmail = { sendEmail() },
+                        onPlayAgain = onPlayAgain,
+                        onQuit = onQuit
+                    )
+                }
             }
+        }
+    }
+}
 
-            OutlinedButton(
-                onClick = onPlayAgain,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.game_over_play_again))
-            }
+@Composable
+private fun GameOverSummary(
+    log: GameLog,
+    durationText: String,
+    resultEmoji: String,
+    resultHeading: String,
+    resultMessage: String,
+    resultValue: String,
+    compact: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.screen_game_over),
+            style = MaterialTheme.typography.titleMedium
+        )
 
-            TextButton(
-                onClick = onQuit,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.home_quit))
-            }
+        Text(
+            text = resultEmoji,
+            style = if (compact) MaterialTheme.typography.displayMedium else MaterialTheme.typography.displayLarge
+        )
+
+        Text(
+            text = resultHeading,
+            style = if (compact) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = resultMessage,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        HorizontalDivider()
+
+        GameOverRow(
+            label = stringResource(R.string.game_over_score_label),
+            value = stringResource(R.string.game_over_score_value, log.score)
+        )
+        GameOverRow(
+            label = stringResource(R.string.game_over_board_label),
+            value = stringResource(R.string.game_over_board_value, log.gridSize)
+        )
+        GameOverRow(
+            label = stringResource(R.string.game_over_duration_label),
+            value = durationText
+        )
+        GameOverRow(
+            label = stringResource(R.string.game_over_result_label),
+            value = resultValue
+        )
+    }
+}
+
+@Composable
+private fun GameOverActions(
+    recipientEmail: String,
+    onRecipientEmailChange: (String) -> Unit,
+    onSendEmail: () -> Unit,
+    onPlayAgain: () -> Unit,
+    onQuit: () -> Unit,
+    modifier: Modifier = Modifier,
+    centerVertically: Boolean = false
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = if (centerVertically) {
+            Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+        } else {
+            Arrangement.spacedBy(16.dp)
+        },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = recipientEmail,
+            onValueChange = onRecipientEmailChange,
+            label = { Text(stringResource(R.string.game_over_email_recipient)) },
+            placeholder = { Text("correo@ejemplo.com") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Button(
+            onClick = onSendEmail,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.game_over_send_email))
+        }
+
+        OutlinedButton(
+            onClick = onPlayAgain,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.game_over_play_again))
+        }
+
+        TextButton(
+            onClick = onQuit,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.home_quit))
         }
     }
 }
@@ -176,9 +278,19 @@ fun GameOverScreen(
 private fun GameOverRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(label, style = MaterialTheme.typography.bodyLarge)
-        Text(value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
