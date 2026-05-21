@@ -6,3 +6,4 @@ import kotlinx.serialization.Serializable
 @Serializable object Game
 @Serializable object GameOver
 @Serializable object Help
+@Serializable object History

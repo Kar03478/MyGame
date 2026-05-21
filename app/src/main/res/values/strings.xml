@@ -62,4 +62,6 @@
     <string name="game_over_result_board_full">Tablero lleno</string>
     <string name="game_over_send_email">📧 Enviar log por correo</string>
     <string name="game_over_play_again">Volver a jugar</string>
+    <string name="history_screen" translatable="false">Historial</string>
+
 </resources>

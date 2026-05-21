@@ -10,15 +10,44 @@ import com.tuapp.mygame.features.game.model.EndReason
 import com.tuapp.mygame.features.game.model.GameLog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tuapp.mygame.features.db.GameLogDao
+import com.tuapp.mygame.features.db.GameLogEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-class GameViewModel : ViewModel() {
+class GameViewModel() : ViewModel() {
     companion object {
         const val TARGET_SCORE = 200
+    }
+
+    private lateinit var dao: GameLogDao
+
+    fun setDao(dao: GameLogDao) {
+        this.dao = dao
+    }
+    fun saveGameLog() {
+        val elapsed = (System.currentTimeMillis() - gameStartTime) / 1000
+        val reason = if (_hasWon.value) {
+            EndReason.WIN
+        } else {
+            if (isTimeUp.value) EndReason.TIME_UP else EndReason.BOARD_FULL
+        }.name
+
+        viewModelScope.launch {
+            dao.insert(
+                GameLogEntity(
+                    alias = _alias.value,
+                    score = _score.value,
+                    rows = _rows.value,
+                    cols = _cols.value,
+                    durationSeconds = elapsed,
+                    result = reason
+                )
+            )
+        }
     }
 
     private val _rows = MutableStateFlow(5)
