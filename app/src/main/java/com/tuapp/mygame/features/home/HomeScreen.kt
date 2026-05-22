@@ -5,6 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,12 +23,23 @@ fun HomeScreen(
     onPlay: () -> Unit,
     onHelp: () -> Unit,
     onHistory: () -> Unit,
+    onSetup: () -> Unit,
     onQuit: () -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            AppTopBar(title = stringResource(R.string.app_name))
+            AppTopBar(
+                title = stringResource(R.string.app_name),
+                actions = {
+                    IconButton(onClick = onSetup) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.setup_settings)
+                        )
+                    }
+                }
+            )
         }
     ) { innerPadding ->
         val configuration = LocalConfiguration.current

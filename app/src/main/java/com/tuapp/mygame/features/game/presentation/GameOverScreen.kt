@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,6 +22,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tuapp.mygame.R
+import com.tuapp.mygame.core.ui.components.AppTopBar
 import com.tuapp.mygame.features.game.model.EndReason
 import com.tuapp.mygame.features.game.model.GameLog
 
@@ -27,6 +30,7 @@ import com.tuapp.mygame.features.game.model.GameLog
 fun GameOverScreen(
     log: GameLog,
     onPlayAgain: () -> Unit,
+    onSetup: () -> Unit,
     onQuit: () -> Unit
 ) {
     val context = LocalContext.current
@@ -88,7 +92,20 @@ fun GameOverScreen(
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            AppTopBar(
+                title = stringResource(R.string.app_name),
+                actions = {
+                    IconButton(onClick = onSetup) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.setup_settings)
+                        )
+                    }
+                }
+            )
+        }
     ) { innerPadding ->
         Box(
             modifier = Modifier
