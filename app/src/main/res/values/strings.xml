@@ -29,7 +29,7 @@
     <string name="setup_board_size">Tamaño del tablero</string>
     <string name="setup_grid_size">%1$dx%1$d</string>
     <string name="setup_time_control">Control de tiempo</string>
-    <string name="setup_start">Empezar</string>
+    <string name="setup_start">Guardar</string>
     <string name="screen_home">Pantalla de inicio</string>
     <string name="screen_setup">Configuración de partida</string>
     <string name="screen_game">Pantalla de juego</string>
@@ -63,5 +63,6 @@
     <string name="game_over_send_email">📧 Enviar log por correo</string>
     <string name="game_over_play_again">Volver a jugar</string>
     <string name="history_screen" translatable="false">Historial</string>
+    <string name="setup_settings">Settings</string>
 
 </resources>

@@ -5,40 +5,44 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tuapp.mygame.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
-    onStartGame: (alias: String, rows: Int, cols: Int, trackTime: Boolean) -> Unit
+    vm: SetupViewModel,
+    onStartGame: (alias: String, rows: Int, cols: Int, trackTime: Boolean) -> Unit,
+    onBack: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
-    var alias by rememberSaveable { mutableStateOf(context.getString(R.string.alias)) }
-    var trackTime by rememberSaveable { mutableStateOf(false) }
-    var gridSize by rememberSaveable { mutableIntStateOf(5) }
+    val prefs by vm.state.collectAsStateWithLifecycle()
 
     SetupScreenContent(
-        alias = alias,
-        trackTime = trackTime,
-        gridSize = gridSize,
-        onAliasChange = { alias = it },
-        onGridSizeSelected = { size ->
-            gridSize = size
-        },
-        onTrackTimeChange = { trackTime = it },
-        onStartGame = { onStartGame(alias, gridSize, gridSize, trackTime) }
+        alias       = prefs.alias,
+        trackTime   = prefs.trackTime,
+        gridSize    = prefs.gridSize,
+        onAliasChange      = vm::updateAlias,
+        onGridSizeSelected = vm::updateGridSize,
+        onTrackTimeChange  = vm::updateTrackTime,
+        onBack = onBack,
+        onStartGame = {
+            vm.saveSetup()
+            onStartGame(prefs.alias, prefs.gridSize, prefs.gridSize, prefs.trackTime)
+        }
     )
 }
 
+@ExperimentalMaterial3Api
 @Composable
 private fun SetupScreenContent(
     alias: String,
@@ -47,13 +51,26 @@ private fun SetupScreenContent(
     onAliasChange: (String) -> Unit,
     onGridSizeSelected: (Int) -> Unit,
     onTrackTimeChange: (Boolean) -> Unit,
+    onBack: (() -> Unit)? = null,
     onStartGame: () -> Unit
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            if (onBack != null) {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.screen_setup)) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        }
+                    }
+                )
+            }
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
