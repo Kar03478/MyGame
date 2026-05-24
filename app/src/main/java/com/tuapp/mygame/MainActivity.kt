@@ -15,39 +15,22 @@ import com.tuapp.mygame.features.db.AppDatabase
 import com.tuapp.mygame.features.setup.SetupPreferencesRepo
 import okio.Path.Companion.toPath
 
-fun createDataStore(producePath: () -> String): DataStore<androidx.datastore.preferences.core.Preferences> =
-    PreferenceDataStoreFactory.createWithPath(
-        produceFile = { producePath().toPath() }
-    )
-internal const val dataStoreFileName = "setup.preferences_pb"
 
 class MainActivity : ComponentActivity() {
-    private val setupRepository by lazy {
-        val dataStore = createDataStore {
-            applicationContext.filesDir.resolve(dataStoreFileName).absolutePath
-        }
-        SetupPreferencesRepo(dataStore)
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            val db = remember {
-                Room.databaseBuilder(
-                    applicationContext,
-                    AppDatabase::class.java,
-                    "mygame-db"
-                ).build()
-            }
 
+        val app = application as MyApp
+
+        setContent {
             MyGameTheme {
                 val vm: GameViewModel = viewModel()
-                val gameLogDao = db.gameLogDao()
-                vm.setDao(gameLogDao)
+                vm.setDao(app.db.gameLogDao())
                 AppNavigation(
                     vm = vm,
-                    setupRepository = setupRepository,
-                    dao = gameLogDao,
+                    setupRepository = app.setupRepository,
+                    dao = app.db.gameLogDao(),
                     onQuit = { finish() }
                 )
             }

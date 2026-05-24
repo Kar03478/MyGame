@@ -1,19 +1,15 @@
 package com.tuapp.mygame.features.setup
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
-
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("settings")
 
 class SetupPreferencesRepo(
     private val dataStore: DataStore<Preferences>
@@ -58,16 +54,6 @@ class SetupPreferencesRepo(
         dataStore.updateData { preferences ->
             preferences.toMutablePreferences().apply {
                 this[PreferenceKeys.TRACK_TIME] = track
-            }
-        }
-    }
-
-    override suspend fun clearData() {
-        dataStore.updateData { preferences ->
-            preferences.toMutablePreferences().apply {
-                remove(PreferenceKeys.ALIAS)
-                remove(PreferenceKeys.GRID_SIZE)
-                remove(PreferenceKeys.TRACK_TIME)
             }
         }
     }

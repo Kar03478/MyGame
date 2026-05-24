@@ -1,7 +1,11 @@
 package com.tuapp.mygame.features.game.presentation
 
+import android.content.ActivityNotFoundException
 import android.content.res.Configuration
 import android.content.Intent
+import android.net.Uri
+import android.util.Patterns
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -36,6 +40,8 @@ fun GameOverScreen(
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     var recipientEmail by rememberSaveable { mutableStateOf("") }
+    val isRecipientEmailValid = recipientEmail.isBlank() ||
+        Patterns.EMAIL_ADDRESS.matcher(recipientEmail).matches()
 
     fun formatDuration(seconds: Long): String {
         val m = seconds / 60
@@ -57,15 +63,24 @@ fun GameOverScreen(
     )
 
     fun sendEmail() {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "message/rfc822"
+        if (!isRecipientEmailValid) {
+            Toast.makeText(context, R.string.game_over_email_invalid, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
             if (recipientEmail.isNotBlank()) {
                 putExtra(Intent.EXTRA_EMAIL, arrayOf(recipientEmail))
             }
             putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.game_over_email_subject, log.score))
             putExtra(Intent.EXTRA_TEXT, buildEmailBody())
         }
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.game_over_email_chooser)))
+        try {
+            context.startActivity(Intent.createChooser(intent, context.getString(R.string.game_over_email_chooser)))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(context, R.string.game_over_email_no_app, Toast.LENGTH_SHORT).show()
+        }
     }
 
     val durationText = formatDuration(log.durationSeconds)
@@ -137,12 +152,15 @@ fun GameOverScreen(
                     GameOverActions(
                         recipientEmail = recipientEmail,
                         onRecipientEmailChange = { recipientEmail = it },
+                        isRecipientEmailValid = isRecipientEmailValid,
                         onSendEmail = { sendEmail() },
                         onPlayAgain = onPlayAgain,
                         onQuit = onQuit,
                         modifier = Modifier
                             .weight(0.85f)
-                            .fillMaxHeight(),
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState()),
+                        compact = true,
                         centerVertically = true
                     )
                 }
@@ -166,6 +184,7 @@ fun GameOverScreen(
                     GameOverActions(
                         recipientEmail = recipientEmail,
                         onRecipientEmailChange = { recipientEmail = it },
+                        isRecipientEmailValid = isRecipientEmailValid,
                         onSendEmail = { sendEmail() },
                         onPlayAgain = onPlayAgain,
                         onQuit = onQuit
@@ -190,7 +209,11 @@ private fun GameOverSummary(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 16.dp)
+        verticalArrangement = if (compact) {
+            Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+        } else {
+            Arrangement.spacedBy(16.dp)
+        }
     ) {
         Text(
             text = stringResource(R.string.screen_game_over),
@@ -240,18 +263,20 @@ private fun GameOverSummary(
 private fun GameOverActions(
     recipientEmail: String,
     onRecipientEmailChange: (String) -> Unit,
+    isRecipientEmailValid: Boolean,
     onSendEmail: () -> Unit,
     onPlayAgain: () -> Unit,
     onQuit: () -> Unit,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
     centerVertically: Boolean = false
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = if (centerVertically) {
-            Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+            Arrangement.spacedBy(if (compact) 8.dp else 16.dp, Alignment.CenterVertically)
         } else {
-            Arrangement.spacedBy(16.dp)
+            Arrangement.spacedBy(if (compact) 8.dp else 16.dp)
         },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -259,13 +284,24 @@ private fun GameOverActions(
             value = recipientEmail,
             onValueChange = onRecipientEmailChange,
             label = { Text(stringResource(R.string.game_over_email_recipient)) },
-            placeholder = { Text("correo@ejemplo.com") },
+            placeholder = { Text(stringResource(R.string.game_over_email_placeholder)) },
+            isError = !isRecipientEmailValid,
+            supportingText = {
+                if (!isRecipientEmailValid) {
+                    Text(stringResource(R.string.game_over_email_invalid))
+                }
+            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Done
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = if (compact) {
+                MaterialTheme.typography.bodySmall
+            } else {
+                LocalTextStyle.current
+            }
         )
 
         Button(
