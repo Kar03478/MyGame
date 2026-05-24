@@ -76,21 +76,24 @@ fun AppNavigation(
         composable<Game> {
             GameScreen(
                 vm = vm,
-                onBack = { vm.abandonGame() },
                 onGameOver = {
+                    if (!vm.shouldOpenResults()) return@GameScreen
                     vm.saveGameLog()
-                    navController.navigate(GameOver)
+                    navController.navigate(GameOver) {
+                        popUpTo(Game) { inclusive = true }
+                    }
                 }
             )
         }
         composable<GameOver> {
+            val finalLog by vm.finalLog.collectAsStateWithLifecycle()
             GameOverScreen(
-                log = vm.buildGameLog(),
+                log = finalLog ?: vm.buildGameLog(),
                 onPlayAgain = {
                     val s = setupVm.state.value
                     vm.startGame(s.alias, s.gridSize, s.gridSize, s.trackTime)
                     navController.navigate(Game) {
-                        popUpTo(Game) { inclusive = true }
+                        popUpTo(GameOver) { inclusive = true }
                     }
                 },
                 onSetup = { navController.navigate(Setup) },

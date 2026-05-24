@@ -95,20 +95,21 @@ fun TraySlot(
                             strokeWidth = 1.5.dp.toPx()
                         )
                     }
-                }
-            ) {
-                detectTapGestures(
-                    onPress = {
-                        startTransfer(
-                            DragAndDropTransferData(
-                                clipData = ClipData.newPlainText(
-                                    DRAG_LABEL,
-                                    trayIndex.toString()
+                },
+                block = {
+                    detectTapGestures(
+                        onPress = {
+                            startTransfer(
+                                DragAndDropTransferData(
+                                    clipData = ClipData.newPlainText(
+                                        DRAG_LABEL,
+                                        trayIndex.toString()
+                                    )
                                 )
                             )
-                        )
-                    }
-                )
-            }
+                        }
+                    )
+                }
+            )
     )
 }

@@ -55,8 +55,7 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 32.dp, vertical = 16.dp)
-                        .verticalScroll(rememberScrollState()),
+                        .padding(horizontal = 32.dp, vertical = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(32.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -69,8 +68,8 @@ fun HomeScreen(
                             contentDescription = stringResource(R.string.home_logo_content_description),
                             modifier = Modifier
                                 .fillMaxWidth(0.85f)
-                                .fillMaxHeight(0.85f)
                                 .sizeIn(maxWidth = 320.dp, maxHeight = 320.dp)
+                                .aspectRatio(1f)
                         )
                     }
                     HomeButtons(

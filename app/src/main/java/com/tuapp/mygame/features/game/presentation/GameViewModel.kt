@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tuapp.mygame.features.db.GameLogDao
 import com.tuapp.mygame.features.db.GameLogEntity
+import com.tuapp.mygame.features.game.model.GameEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,34 +22,17 @@ import kotlinx.coroutines.launch
 class GameViewModel() : ViewModel() {
     companion object {
         const val TARGET_SCORE = 200
+        private const val GAME_DURATION_SECONDS = 120L
     }
+    private val _events = MutableStateFlow<List<GameEvent>>(emptyList())
+    val events = _events.asStateFlow()
 
-    private lateinit var dao: GameLogDao
+    private var dao: GameLogDao? = null
+    private var hasInsertedFinalLog = false
+    private var hasOpenedResults = false
 
-    fun setDao(dao: GameLogDao) {
-        this.dao = dao
-    }
-    fun saveGameLog() {
-        val elapsed = (System.currentTimeMillis() - gameStartTime) / 1000
-        val reason = if (_hasWon.value) {
-            EndReason.WIN
-        } else {
-            if (isTimeUp.value) EndReason.TIME_UP else EndReason.BOARD_FULL
-        }.name
-
-        viewModelScope.launch {
-            dao.insert(
-                GameLogEntity(
-                    alias = _alias.value,
-                    score = _score.value,
-                    rows = _rows.value,
-                    cols = _cols.value,
-                    durationSeconds = elapsed,
-                    result = reason
-                )
-            )
-        }
-    }
+    private val _finalLog = MutableStateFlow<GameLog?>(null)
+    val finalLog = _finalLog.asStateFlow()
 
     private val _rows = MutableStateFlow(5)
     val rows = _rows.asStateFlow()
@@ -77,11 +61,41 @@ class GameViewModel() : ViewModel() {
 
     private var gameStartTime = 0L
 
+    fun setDao(dao: GameLogDao) {
+        this.dao = dao
+    }
+    fun saveGameLog() {
+        val log = snapshotFinalLog()
+        val logDao = dao ?: return
+        if (hasInsertedFinalLog) return
+        hasInsertedFinalLog = true
 
+        viewModelScope.launch {
+            logDao.insert(
+                GameLogEntity(
+                    alias = log.alias,
+                    score = log.score,
+                    rows = _rows.value,
+                    cols = _cols.value,
+                    durationSeconds = log.durationSeconds,
+                    result = log.endReason.name
+                )
+            )
+        }
+    }
+
+    private fun addEvent(message: String) {
+        _events.value = _events.value + GameEvent(message = message)
+    }
     private val timer = GameTimer(
-        durationSeconds = 120L,
+        durationSeconds = GAME_DURATION_SECONDS,
         scope = viewModelScope,
-        onTimeUp = { _isGameOver.value = true }
+        onTimeUp = {
+            if (!_hasWon.value && !_isGameOver.value) {
+                _isGameOver.value = true
+                addEvent("Tiempo agotado")
+            }
+        }
     )
 
     val timeLeft = timer.timeLeft
@@ -98,8 +112,19 @@ class GameViewModel() : ViewModel() {
         _tray.value  = newTray()
         _isGameOver.value = false
         gameStartTime     = System.currentTimeMillis()
-
+        _finalLog.value = null
+        hasInsertedFinalLog = false
+        hasOpenedResults = false
         if (withTimer) timer.start() else timer.reset()
+        _events.value = emptyList()
+        addEvent("Partida iniciada: $playerAlias")
+    }
+
+    fun shouldOpenResults(): Boolean {
+        snapshotFinalLog()
+        if (hasOpenedResults) return false
+        hasOpenedResults = true
+        return true
     }
 
     fun placePiece(trayIndex: Int, row: Int, col: Int) {
@@ -129,7 +154,9 @@ class GameViewModel() : ViewModel() {
                     it[trayIndex] = randomPiece()
                 }
                 if (!_hasWon.value) {
-                    _isGameOver.value = isGameOver(_cells.value)
+                    val ended = isGameOver(_cells.value)
+                    _isGameOver.value = ended
+                    if (ended) addEvent("Tablero lleno")
                 }
             }
         } else {
@@ -139,17 +166,22 @@ class GameViewModel() : ViewModel() {
                 it[trayIndex] = randomPiece()
             }
             if (!_hasWon.value) {
-                _isGameOver.value = isGameOver(result.grid)
+                val ended = isGameOver(result.grid)
+                _isGameOver.value = ended
+                if (ended) addEvent("Tablero lleno")
             }
         }
     }
 
     private fun applyPoints(points: Int) {
+        if (points > 0) addEvent("Pieza fusionada: +$points pts")
+        else addEvent("Pieza colocada")
         _score.value += points
         if (_score.value >= TARGET_SCORE) {
             _hasWon.value = true
             _isGameOver.value = false
             timer.cancel()
+            addEvent("Victoria")
         }
     }
 
@@ -162,28 +194,14 @@ class GameViewModel() : ViewModel() {
         type   = CakeType.entries.random(),
         slices = (1..3).random()
     )
-    fun resetGame() {
-        if (_trackTime.value) timer.start() else timer.reset()
-        _score.value = 0
-        _hasWon.value = false
-        _isGameOver.value = false
-        _cells.value = emptyGrid(_rows.value, _cols.value)
-        _tray.value = newTray()
-    }
-
-    fun abandonGame() {
-        timer.reset()
-        _score.value = 0
-        _hasWon.value = false
-        _isGameOver.value = false
-        _cells.value = emptyGrid(_rows.value, _cols.value)
-        _tray.value = newTray()
-    }
-
     override fun onCleared() {
         super.onCleared()
         timer.cancel()
     }
+    private fun snapshotFinalLog(): GameLog {
+        return _finalLog.value ?: buildGameLog().also { _finalLog.value = it }
+    }
+
     fun buildGameLog(): GameLog {
         val elapsed = (System.currentTimeMillis() - gameStartTime) / 1000
         return GameLog(

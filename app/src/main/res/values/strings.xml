@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">MyGame</string>
     <string name="alias">Pastelera</string>
-    <string name="Rows">Rows: </string>
-    <string name="Cols">Cols: </string>
     <string name="atras">Atrás</string>
     <string name="home_logo_content_description">Logo Pastelitos</string>
     <string name="home_play">¡Jugar!</string>
@@ -30,17 +28,15 @@
     <string name="setup_grid_size">%1$dx%1$d</string>
     <string name="setup_time_control">Control de tiempo</string>
     <string name="setup_start">Guardar</string>
-    <string name="screen_home">Pantalla de inicio</string>
     <string name="screen_setup">Configuración de partida</string>
     <string name="screen_game">Pantalla de juego</string>
     <string name="screen_game_over">Pantalla de resultados</string>
-    <string name="screen_help">Pantalla de ayuda</string>
     <string name="game_score">Puntos: %1$d / %2$d</string>
-    <string name="game_screen_title">Partida</string>
-    <string name="game_over_victory_title">¡Victoria!</string>
-    <string name="game_over_title">Fin de partida</string>
     <string name="game_over_email_subject">Mi partida de Pastelitos — %1$d puntos</string>
     <string name="game_over_email_chooser">Enviar log por correo</string>
+    <string name="game_over_email_placeholder">correo@ejemplo.com</string>
+    <string name="game_over_email_invalid">Introduce un correo válido.</string>
+    <string name="game_over_email_no_app">No hay ninguna app de correo disponible.</string>
     <string name="game_over_email_body">Resumen de partida — Pastelitos Junta &amp; Juega\n\nJugador:        %1$s\nPuntuación:     %2$d puntos\nTablero:        %3$dx%3$d\nDuración:       %4$s\nResultado:      %5$s</string>
     <string name="game_over_win_emoji">🎉</string>
     <string name="game_over_time_up_emoji">⏱️</string>
@@ -60,9 +56,28 @@
     <string name="game_over_result_win">Victoria</string>
     <string name="game_over_result_time_up">Tiempo agotado</string>
     <string name="game_over_result_board_full">Tablero lleno</string>
+    <string name="game_log_live_title">Log en vivo</string>
+    <string name="game_log_player_label">Jugador</string>
+    <string name="game_log_board_value">%1$dx%2$d</string>
+    <string name="game_log_cells_label">Celdas ocupadas</string>
+    <string name="game_log_cells_value">%1$d / %2$d</string>
+    <string name="game_log_timer_label">Tiempo</string>
+    <string name="game_log_no_timer">Sin límite</string>
+    <string name="game_log_status_in_progress">En curso</string>
+    <string name="game_log_events_title">Eventos</string>
     <string name="game_over_send_email">📧 Enviar log por correo</string>
     <string name="game_over_play_again">Volver a jugar</string>
     <string name="history_screen" translatable="false">Historial</string>
+    <string name="history_empty">Todavía no hay partidas guardadas.</string>
+    <string name="history_date_label">Fecha</string>
+    <string name="history_board_label">Tablero</string>
+    <string name="history_duration_label">Duración</string>
+    <string name="history_result_label">Resultado</string>
+    <string name="history_score_label">Puntuación</string>
+    <string name="history_score_value">%1$d puntos</string>
+    <string name="history_board_value">%1$d × %2$d</string>
+    <string name="history_duration_minutes_value">%1$dm %2$ds</string>
+    <string name="history_duration_seconds_value">%1$ds</string>
     <string name="setup_settings">Settings</string>
 
 </resources>
